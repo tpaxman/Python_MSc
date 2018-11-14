@@ -1,0 +1,15 @@
+idNum,captionName,captionDescrip
+1,Table 2.1,Physical properties
+2,Table 2.2,Range of tracheal Reynolds numbers
+3,Table 2.3,"beta, alpha, R2 values for CF vs. Re plots"
+4,Table 2.4,Ideal C coefficient for modified-Blasius eqn
+5,Table 2.5,Average pressure drop ratios of heliox vs. air (branching and nose-throat)
+6,Table 3.1,"Finlay model dimensions of generations for 4-yr-old, 8-yr-old, adult"
+7,Table 3.2,Gas properties from Katz et al. (2011)
+8,Table 3.3,Typical inspiratory flow rates for ages 4 and 8
+9,Table 3.4,Inspiratory flow rates at various levels of activity
+10,Table 3.5,"Contributions of viscosity and density to the pressure drop models, modified-Blasius and Pedley"
+11,Table 3.6,Nominal flow rates at which total branching airway pressure drop from Pedley exceeds modified-Blasius
+12,Table 3.7,Percent increase of total branching airways pressure drop comparing model switch generations (at 14 L/min)
+13,Table 3.8,"Percent increase of total branching airways pressure drop comparing fluid types (at 14 L/min, G_T = 6)"
+14,Table 3.9,"Total branching airway single path pressure drop (pure Pedley, pure modified-Blasius model, combo at G_T = 6)"

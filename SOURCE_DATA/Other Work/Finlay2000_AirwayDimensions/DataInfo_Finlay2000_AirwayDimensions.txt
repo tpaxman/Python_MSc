@@ -1,0 +1,17 @@
+Data for Age 4, Age 8, and Adult airways is found in:
+
+Finlay, W. H., et al. (2000). "Lung delivery of aerosolized dextran." Am J Respir Crit Care Med 161(1): 91-97.
+
+
+Adult data is replicated in:
+
+Finlay textbook (2001) "The Mechanics of Inhaled Pharmaceutical Aerosols", page 98
+
+Description:
+Table 5.1   Dimensions of the Weibel A lung geometry (Weibel 1963) scaled to a 3 l lung volume, and using a volume of 10-5 ml per alveoli, is compared to the symmetric lung geometry used by Finlay et al. (2000). The thick lines in the table indicate the border between the alveolar and tracheo-bronchial regions in the models. The mouth-throat volume has not been included in the cumulative volume.
+
+
+Imported with:
+https://www.pdftoexcel.com/
+
+Verified all imported data to make sure it was correctly copied (2018-02-20)

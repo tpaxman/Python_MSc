@@ -1,0 +1,13 @@
+idNum,captionName,captionDescrip
+1,Figure 2.3,Log-log plot of CF vs. Re for sub 10 in (branching and nose-throat airways)
+2,Figure 2.4,Branching airways pressure drop using the blasius equation vs. experimental pressure drop (C_ideal and C_avg)
+3,Figure 2.5,Pressure drop vs. flow rate for subject 10 in the (branching and nose-throat airways)
+4,Figure 3.1,Reynolds number in each branch vs. generation number
+5,Figure 3.2,Total single-path pressure drop (generations 0–23) vs. model transition generation
+6,Figure 3.3,Model transition generation where max. branching airway pressure drop occurs vs. tracheal flow rate
+7,Figure 3.4,Ratio of length to laminar entry length at each airway generation
+8,Figure 3.5,Generation of airway path where airway length first exceeds laminar entry length vs. flow rate
+9,Figure 3.6,Total single-path pressure drop (generation 0–23) for low activity to light exertion
+10,Figure 3.7,Total single-path pressure drop (generations 0–23) for light to heavy exertion level
+11,Figure 3.8,Generational and cumulative tracheobronchial pressure drop (generations 0–23)
+12,Figure 3.9,Total tracheobronchial pressure drop percent increases vs. nominal inlet flow rate compared between cases

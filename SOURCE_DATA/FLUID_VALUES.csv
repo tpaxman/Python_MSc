@@ -1,0 +1,4 @@
+fluidFlag,fluidName,rho,mu,K_SE,latexName
+1,air,1.206,1.82E-05,1,Air
+2,heliox,0.399,2.15E-05,1,He-$\mathrm{O_2}$ (80/20)
+3,entonox,1.58,1.58E-05,1,$\mathrm{N_2O}$-$\mathrm{O_2}$ (50/50)

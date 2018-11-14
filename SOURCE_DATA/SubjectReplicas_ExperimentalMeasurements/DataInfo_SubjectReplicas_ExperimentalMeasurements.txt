@@ -1,0 +1,32 @@
+
+EXPERIMENT DATA
+
+HELIOX_FLOWRATE_CONVERT
+
+
+PDROP_EMPTY
+
+Air - empty case readings
+
+Date: 2017-08-14
+Method: Recorded using no lid on the case (open to air)
+Runs: 3 runs completed, as shown here.
+Flow type: STD
+Qstd units: L/min
+Pdrop units: Pa
+Flow meter fluid setting: "Air"
+Actual fluid: Air
+
+
+Heliox - empty case readings
+
+Date: 2017-08-14
+Method: Recorded using tubing connected to lid
+Runs: 3 runs completed, as shown here.
+Flow type: STD
+Qstd units: L/min
+Pdrop units: Pa
+Flow meter fluid setting: "Air"
+Actual fluid: Heliox
+
+
