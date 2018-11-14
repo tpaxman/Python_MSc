@@ -1,13 +1,10 @@
 import numpy as np
 import pandas as pd
 
-def correcthelioxflowrates(T,H):
+def helioxflowratecorrector(q,H):
     TSI_Q  = H.loc[:,('tsiAirReading','mean')]
     TRUE_Q = H.loc[:,('actualHelioxFlowRate','mean')]
-    corrector = lambda qH: np.interp(qH, TSI_Q, TRUE_Q)
-    mask = T.fluidFlag==2
-    T.loc[mask, 'Qstp'] = T.loc[mask, 'Qstp'].map(corrector)
-    return T
+    return np.interp(q, TSI_Q, TRUE_Q)
 
 F = pd.read_csv("./SOURCE_DATA/FLUID_VALUES.csv")
 S = pd.read_csv("./SOURCE_DATA/SubjectReplicas_AirwayDimensions/SUBJECT_VALUES.csv")
@@ -17,11 +14,9 @@ E = pd.read_csv("./SOURCE_DATA/SubjectReplicas_ExperimentalMeasurements/PDROP_EM
 
 
 H = pd.pivot_table(H, index='alicatHeliumReading', aggfunc=(np.mean,np.std))
-T = correcthelioxflowrates(T,H)
 
-
-
-
+mask = T.fluidFlag==2
+T.loc[mask, 'Qstp'] = helioxflowratecorrector(T.loc[mask, 'Qstp'], H)
     
     
     
