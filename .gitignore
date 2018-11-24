@@ -1,0 +1,17 @@
+*.png
+*.asv
+*.xlsx
+*.pdf
+*.fig
+*.mat
+*.xls
+*.doc
+*.docx
+*.png
+*.jpg
+*.jpeg
+*.tiff
+*.eps
+*.ipynb
+*.pyc
+desktop.ini

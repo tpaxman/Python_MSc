@@ -44,20 +44,23 @@ H = pd.pivot_table(H, index='alicatHeliumReading', aggfunc=(np.mean,np.std))
 mask = T.fluidFlag==2
 T.loc[mask, 'Qstp'] = correcthelioxflowerror(T.loc[mask, 'Qstp'], H)
 
+
+
 # Find qNom values and add to main table
 
 # FIND QNOM GROUPS
-qValues = T.loc[T['fluidFlag']==1,'Qstp'].values
-qGroups = DBSCAN().fit(qValues.reshape(-1,1)).labels_
-df = pd.DataFrame({'group':qGroups, 'Qstp':qValues})
+FLUID_FLAG = 2;
+qValues = T.loc[T['fluidFlag']==FLUID_FLAG,'Qstp'].values
+qGroup = DBSCAN().fit(qValues.reshape(-1,1)).labels_
+df = pd.DataFrame({'qGroup':qGroup, 'Qstp':qValues})
 
 #FIND MEAN OF EACH GROUP
-df_groups = df.groupby(by='group').mean()
+df_groups = df.groupby(by='qGroup').mean()
 df_groups['Qnom']=np.round(df_groups['Qstp']).astype(int)
 df_groups = df_groups.drop(columns='Qstp')
 
 ##MAP QNOM VALUES TO MAIN TABLE
-df2 = pd.merge(df, df_groups, how='left', left_on='group', right_on='group')
+df2 = pd.merge(df, df_groups, how='left', left_on='qGroup', right_on='qGroup')
 
 
 
@@ -88,4 +91,23 @@ qNomHel = findqnom(T,2,N_QNOM)
     
     
 #def accumanddofun():
+
+
+# SCRAP
+# TRASH IT. DON'T NEED IT.
+
+def get_property_dict(df,indexname,propertyname):
+    property_dict = df[[indexname,propertyname]].set_index(indexname).to_dict()[propertyname]
+    return property_dict
+
+def get_property_df(df,indexname,propertyname):
+    property_df = df[[indexname,propertyname]].set_index(indexname)
+    return property_df    
+ 
+areaattach_dict = get_property_dict(S,'subNum','areaAttach')
+rho_dict        = get_property_dict(F,'fluidName','rho')
+
+area_df = get_property_df(S,'subNum','areaAttach')
+#areaattach_dict = S[['subNum','areaAttach']].set_index('subNum').to_dict()['areaAttach']
+#rho_dict = F[['fluidName','rho']].set_index('fluidName').to_dict()['rho']
     
