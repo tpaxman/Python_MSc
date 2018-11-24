@@ -12,6 +12,5 @@
 *.jpeg
 *.tiff
 *.eps
-*.ipynb
 *.pyc
 desktop.ini
