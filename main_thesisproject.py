@@ -3,11 +3,11 @@
 
 # # EXPERIMENTAL DATA
 
-# In[71]:
+# In[ ]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
-
+import importlib
 import numpy as np
 import pandas as pd
 from sklearn.cluster import KMeans, DBSCAN
@@ -23,7 +23,7 @@ sns.set()
 # ## Corrections for heliox flowrates (DataFrame 'H')
 # The flowmeter used in the experiments (TSI) does not have a built in setting for heliox. The vendor recommended a correction factor to use while using heliox while the flowmeter was set for 'Air'. This correction factor turned out to be erroneous when testing with an Alicat flow controller, which had been validated. In order to shift all the heliox measurement flowrate to their proper values, a table of points showing the reading on the Alicat controller (correct) and the simultaneous reading on the TSI flow meter (incorrect) were recorded (in `HELIOX_FLOWRATE_CONVERT.csv`)
 
-# In[72]:
+# In[ ]:
 
 
 # IMPORT CORRECTIONS FOR ERRONEOUS HELIOX READINGS
@@ -31,7 +31,7 @@ H = pd.read_csv("./SOURCE_DATA/SubjectReplicas_ExperimentalMeasurements/HELIOX_F
 H = pd.pivot_table(H, index='alicatHeliumReading', aggfunc=(np.mean,np.std))  #aggregate and average repeated measurements 
 
 
-# In[73]:
+# In[ ]:
 
 
 # CORRECT HELIOX FLOW RATES
@@ -52,7 +52,7 @@ def correcthelioxflowrates(df,H):
 # * flow rates (`qstp`): 5-30 L/min for air, 7-45 L/min for heliox, recorded by the TSI meter for STP conditions
 # * subject replicas (`subnum`): 10 child subjects numbered 2, 3, 5, 6, 9, 10, 11, 12, 13, 14.
 
-# In[74]:
+# In[ ]:
 
 
 # IMPORT EXPERIMENTAL DATA
@@ -70,7 +70,7 @@ T['config'] = T['config'].map({0:'detach', 1:'attach'})
 T = correcthelioxflowrates(T,H)
 
 
-# In[75]:
+# In[ ]:
 
 
 T[T['fluid']=='heliox'].head()
@@ -78,7 +78,7 @@ T[T['fluid']=='heliox'].head()
 
 # ## Compute nominal flowrate (`qnom`)
 
-# In[76]:
+# In[ ]:
 
 
 # DIVIDE EACH READING INTO Q_NOMINAL GROUP USING 'DBSCAN'
@@ -93,13 +93,13 @@ T = assignqnomgroups(T,'heliox')
 T['qnom'] = T['qnom'].astype(int)  # convert index value to integer afterward
 
 
-# In[77]:
+# In[ ]:
 
 
 T.head()
 
 
-# In[78]:
+# In[ ]:
 
 
 # FIND AVERAGE QNOM VALUES FOR EACH QNOM GROUP
@@ -117,13 +117,13 @@ QNOM_GROUPS_DICT_HEL = get_qnom_dict(T,'heliox')
 QNOM_GROUPS_DICT = {'air':QNOM_GROUPS_DICT_AIR, 'heliox':QNOM_GROUPS_DICT_HEL}
 
 
-# In[79]:
+# In[ ]:
 
 
 QNOM_GROUPS_DICT
 
 
-# In[80]:
+# In[ ]:
 
 
 # REPLACE QNOM GROUP INDICES WITH ACTUAL VALUES USING THE DICTIONARY
@@ -135,7 +135,7 @@ T = replace_qnom_groups_with_values(T,QNOM_GROUPS_DICT,'air')
 T = replace_qnom_groups_with_values(T,QNOM_GROUPS_DICT,'heliox')
 
 
-# In[81]:
+# In[ ]:
 
 
 T = T.groupby(by=['fluid','config','subnum','qnom']).mean().reset_index()
@@ -143,7 +143,7 @@ T = T.groupby(by=['fluid','config','subnum','qnom']).mean().reset_index()
 
 # # Join attached and detached configurations
 
-# In[82]:
+# In[ ]:
 
 
 # Break table apart into 2 pieces for each configuration (attached, detached) 
@@ -156,7 +156,7 @@ Tattach = slicetable_on_config(T,'attach')
 Tdetach = slicetable_on_config(T,'detach')
 
 
-# In[83]:
+# In[ ]:
 
 
 # Join tables together based on fluid type, subject number and nominal flow rate
@@ -165,7 +165,7 @@ T = T.rename({'pdrop_x':'pdrop_attach', 'pdrop_y':'pdrop_detach'}, axis='columns
 T = T.rename({'qstp_x' :'qstp_attach' , 'qstp_y' :'qstp_detach'},  axis='columns')
 
 
-# In[84]:
+# In[ ]:
 
 
 # Average each flow rate reading to use as the flow rate
@@ -174,14 +174,14 @@ T['qstp'] = T[qstp_list].mean(axis=1)
 T = T.drop(columns=qstp_list)
 
 
-# In[85]:
+# In[ ]:
 
 
 # Rearrange columns
 T = T[['fluid','subnum','qnom','qstp','pdrop_attach','pdrop_detach']]
 
 
-# In[86]:
+# In[ ]:
 
 
 T.head()
@@ -191,7 +191,7 @@ T.head()
 
 # ## Calculate sudden expansion pressure drop
 
-# In[87]:
+# In[ ]:
 
 
 F = pd.read_csv("./SOURCE_DATA/FLUID_VALUES.csv")
@@ -199,14 +199,14 @@ F = F.rename({'fluidName':'fluid', 'K_SE':'k_se','latexName':'latexname'}, axis=
 F = F.drop(columns='fluidFlag')
 
 
-# In[88]:
+# In[ ]:
 
 
 S = pd.read_csv("./SOURCE_DATA/SubjectReplicas_AirwayDimensions/SUBJECT_VALUES.csv")
 S = S.rename({'subNum':'subnum', 'areaAttach':'attacharea'}, axis='columns')
 
 
-# In[89]:
+# In[ ]:
 
 
 def map_df_small_to_big(df_big,df_small,indexname,propertyname,keepwhat='wholetable'):
@@ -223,7 +223,7 @@ def map_df_small_to_big(df_big,df_small,indexname,propertyname,keepwhat='wholeta
         return df_aug[propertyname]  # or keep only the new property values
 
 
-# In[90]:
+# In[ ]:
 
 
 # add necessary values to table for vector calculation of p_se, then drop them after. 
@@ -241,7 +241,7 @@ T['pdrop_se'] = calc_pdrop_se(T['qstp'].values, T['attacharea'].values, T['rho']
 T = T.drop(['attacharea','rho','mu','k_se'], axis=1)
 
 
-# In[91]:
+# In[ ]:
 
 
 T.head()
@@ -249,7 +249,7 @@ T.head()
 
 # ## Import empty pressure drop readings
 
-# In[92]:
+# In[ ]:
 
 
 # Import data
@@ -280,7 +280,7 @@ E = pd.pivot_table(E, index=['fluid','qnom'], aggfunc=np.mean)  #aggregate and a
 E = E.reset_index()
 
 
-# In[93]:
+# In[ ]:
 
 
 def powerfit(x,y):
@@ -310,7 +310,7 @@ def make_pdrop_empty_main_func(E):
 calc_pdrop_empty = make_pdrop_empty_main_func(E)
 
 
-# In[94]:
+# In[ ]:
 
 
 # Calculate 'pdrop_empty' to account for the exit pipe dimensions
@@ -319,7 +319,7 @@ T['pdrop_empty'] = np.vectorize(calc_pdrop_empty)(T.qstp,T.fluid)
 
 # ## Calculate Branching and Nose-Throat pressure drop
 
-# In[95]:
+# In[ ]:
 
 
 # Calculate pdrop_dist and pdrop_nt as a function of the other recorded pressure drop values
@@ -328,7 +328,7 @@ T['pdrop_nosethroat'] = T['pdrop_detach'] - T['pdrop_se'] - T['pdrop_empty']
 T = T.drop(['pdrop_attach','pdrop_detach','pdrop_se','pdrop_empty'], axis=1)
 
 
-# In[96]:
+# In[ ]:
 
 
 T.head()
@@ -338,7 +338,7 @@ T.head()
 
 # Function definitions
 
-# In[97]:
+# In[ ]:
 
 
 # add necessary values to main table in preparation for calculations
@@ -356,20 +356,20 @@ T = T.drop(['diam','rho','mu'], axis=1)
 
 # # ANALYTICAL CALCULATIONS
 
-# In[98]:
+# In[ ]:
 
 
 x = T[(T.subnum==3) & (T.fluid=='heliox')]
 x.plot('reynoldsnum','cf_branching');
 
 
-# In[99]:
+# In[ ]:
 
 
 T.head()
 
 
-# In[100]:
+# In[ ]:
 
 
 #plt.rcParams['figure.figsize'] = [16,7]
@@ -385,7 +385,7 @@ T.head()
 #plt.show()
 
 
-# In[101]:
+# In[ ]:
 
 
 #sns.set_style('white')
@@ -396,30 +396,101 @@ T.head()
 #x.plot()2
 
 
-# In[102]:
-
-
-help(sum)
-
-
-# In[103]:
-
-
-def calcpdropblasius(Q_mcube=None, D_m=None, L_m=None, rho_kgm3=None, mu_Pas=None, blasiusC=None):
-    # Calculate pressure drop  with the turbulent Blasius model
-    # where the coefficient C can be varied (originally C = 0.316)
-    #% f calculation
-    alpha = 0.25
-    Re = flow2Re(Q_mcube, D_m, rho_kgm3, mu_Pas)
-    f = blasiusC *elmul* (Re + eps) **elpow** -alpha
-    #% Velocity calculation
-    A_m2 = diam2area(D_m)
-    V = flow2vel(Q_mcube, A_m2)
-    pDrop = f *elmul* (L_m /eldiv/ D_m) *elmul* (1 / 2) *elmul* (V **elpow** 2) *elmul* rho_kgm3
-
-
 # # TO DO #
-# - Move base functions to their own module (fluids)
-# - Set up gitignore to avoid ipnyb files
 # - Change file hierarchy in folders
 # - Combine base files with MATLAB so that both can work on the data at once.
+
+# In[ ]:
+
+
+importlib.reload(fluids)
+
+
+# In[ ]:
+
+
+fluids.calc_pdrop_blasius(5,1,2,3,4,5)
+
+
+# In[ ]:
+
+
+fluids.calc_pdrop_modpedley(5,1,2,3,4,5)
+
+
+# In[ ]:
+
+
+fluids.calc_pdrop_pedley(5,1,2,3,4)
+
+
+# In[ ]:
+
+
+for gen in range(11):
+    print(gen, fluids.calc_pdrop_modpedley(10,10/1000,0.1,1.2,1.8e-5,gen))
+
+
+# In[ ]:
+
+
+def import_branching_airway_dimensions(subnum):
+    fpath = './SOURCE_DATA/SubjectReplicas_AirwayDimensions/'
+    fname = 'Sub' + str(subnum)
+    fext  = '.txt'
+    df = pd.read_csv(fpath + fname + fext, sep='\t', 
+                     names=['name','length_mm','diam_mm'])
+    df['diam_m'] = df.diam_mm / 1000
+    df['length_m'] = df.length_mm / 1000 
+    df['gen'] = df.name.str.replace('(\d+).*', '\g<1>').astype(int)
+    df = df.drop(columns=['diam_mm','length_mm'])
+    return df    
+
+def find_parents(df):
+    df['parent'] = (df.gen - 1).astype(str) + df.name.str.replace('^\d+|.$','')
+    df['iparent'] = ''
+    for parent in df.parent[1:]:
+        df.loc[df.parent==parent, 'iparent'] = df.loc[df.name == parent].index[0]
+    return df
+
+def find_daughters(df):
+    daughternames = []
+    daughterindex = []
+    for name in a.name:
+        daughternames.append(a.loc[a.parent==name,'name'].values)
+        daughterindex.append(a.loc[a.parent==name].index.values)
+    df['daughters'] = daughternames
+    df['idaughters'] = daughterindex
+    return df
+
+a=import_branching_airway_dimensions(2)
+a=find_parents(a)
+a=find_daughters(a)
+
+
+# In[ ]:
+
+
+for x in a.daughters:
+    #print(x,type(x))
+    print(a.name[a.name.isin(x.tolist())].index.values)
+
+
+# In[ ]:
+
+
+x=a.daughters[0].tolist()
+x in a.name.values.tolist()
+
+
+# In[ ]:
+
+
+a[a.name.isin(['1a','1b'])].index.values
+
+
+# In[ ]:
+
+
+a.daughters.values
+

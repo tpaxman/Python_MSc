@@ -9,7 +9,7 @@ def flow_to_vel(q_lpm, area_m2):
     '''converts flow rate (m3/s) and area (m2) to velocity (m/s)'''
     q_m3s = lpm_to_m3s(q_lpm)
     vel_mps = q_m3s/area_m2
-    return vel_mps
+    return vel_mps    
     
 def calc_area(diam_m):
     area_m2 = np.pi * diam_m**2 / 4
