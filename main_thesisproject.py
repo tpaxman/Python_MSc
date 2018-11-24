@@ -3,7 +3,7 @@
 
 # # EXPERIMENTAL DATA
 
-# In[38]:
+# In[71]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
@@ -23,7 +23,7 @@ sns.set()
 # ## Corrections for heliox flowrates (DataFrame 'H')
 # The flowmeter used in the experiments (TSI) does not have a built in setting for heliox. The vendor recommended a correction factor to use while using heliox while the flowmeter was set for 'Air'. This correction factor turned out to be erroneous when testing with an Alicat flow controller, which had been validated. In order to shift all the heliox measurement flowrate to their proper values, a table of points showing the reading on the Alicat controller (correct) and the simultaneous reading on the TSI flow meter (incorrect) were recorded (in `HELIOX_FLOWRATE_CONVERT.csv`)
 
-# In[3]:
+# In[72]:
 
 
 # IMPORT CORRECTIONS FOR ERRONEOUS HELIOX READINGS
@@ -31,7 +31,7 @@ H = pd.read_csv("./SOURCE_DATA/SubjectReplicas_ExperimentalMeasurements/HELIOX_F
 H = pd.pivot_table(H, index='alicatHeliumReading', aggfunc=(np.mean,np.std))  #aggregate and average repeated measurements 
 
 
-# In[4]:
+# In[73]:
 
 
 # CORRECT HELIOX FLOW RATES
@@ -52,7 +52,7 @@ def correcthelioxflowrates(df,H):
 # * flow rates (`qstp`): 5-30 L/min for air, 7-45 L/min for heliox, recorded by the TSI meter for STP conditions
 # * subject replicas (`subnum`): 10 child subjects numbered 2, 3, 5, 6, 9, 10, 11, 12, 13, 14.
 
-# In[5]:
+# In[74]:
 
 
 # IMPORT EXPERIMENTAL DATA
@@ -70,7 +70,7 @@ T['config'] = T['config'].map({0:'detach', 1:'attach'})
 T = correcthelioxflowrates(T,H)
 
 
-# In[6]:
+# In[75]:
 
 
 T[T['fluid']=='heliox'].head()
@@ -78,7 +78,7 @@ T[T['fluid']=='heliox'].head()
 
 # ## Compute nominal flowrate (`qnom`)
 
-# In[7]:
+# In[76]:
 
 
 # DIVIDE EACH READING INTO Q_NOMINAL GROUP USING 'DBSCAN'
@@ -93,13 +93,13 @@ T = assignqnomgroups(T,'heliox')
 T['qnom'] = T['qnom'].astype(int)  # convert index value to integer afterward
 
 
-# In[8]:
+# In[77]:
 
 
 T.head()
 
 
-# In[9]:
+# In[78]:
 
 
 # FIND AVERAGE QNOM VALUES FOR EACH QNOM GROUP
@@ -117,13 +117,13 @@ QNOM_GROUPS_DICT_HEL = get_qnom_dict(T,'heliox')
 QNOM_GROUPS_DICT = {'air':QNOM_GROUPS_DICT_AIR, 'heliox':QNOM_GROUPS_DICT_HEL}
 
 
-# In[10]:
+# In[79]:
 
 
 QNOM_GROUPS_DICT
 
 
-# In[11]:
+# In[80]:
 
 
 # REPLACE QNOM GROUP INDICES WITH ACTUAL VALUES USING THE DICTIONARY
@@ -135,7 +135,7 @@ T = replace_qnom_groups_with_values(T,QNOM_GROUPS_DICT,'air')
 T = replace_qnom_groups_with_values(T,QNOM_GROUPS_DICT,'heliox')
 
 
-# In[12]:
+# In[81]:
 
 
 T = T.groupby(by=['fluid','config','subnum','qnom']).mean().reset_index()
@@ -143,7 +143,7 @@ T = T.groupby(by=['fluid','config','subnum','qnom']).mean().reset_index()
 
 # # Join attached and detached configurations
 
-# In[13]:
+# In[82]:
 
 
 # Break table apart into 2 pieces for each configuration (attached, detached) 
@@ -156,7 +156,7 @@ Tattach = slicetable_on_config(T,'attach')
 Tdetach = slicetable_on_config(T,'detach')
 
 
-# In[14]:
+# In[83]:
 
 
 # Join tables together based on fluid type, subject number and nominal flow rate
@@ -165,7 +165,7 @@ T = T.rename({'pdrop_x':'pdrop_attach', 'pdrop_y':'pdrop_detach'}, axis='columns
 T = T.rename({'qstp_x' :'qstp_attach' , 'qstp_y' :'qstp_detach'},  axis='columns')
 
 
-# In[15]:
+# In[84]:
 
 
 # Average each flow rate reading to use as the flow rate
@@ -174,14 +174,14 @@ T['qstp'] = T[qstp_list].mean(axis=1)
 T = T.drop(columns=qstp_list)
 
 
-# In[16]:
+# In[85]:
 
 
 # Rearrange columns
 T = T[['fluid','subnum','qnom','qstp','pdrop_attach','pdrop_detach']]
 
 
-# In[17]:
+# In[86]:
 
 
 T.head()
@@ -191,7 +191,7 @@ T.head()
 
 # ## Calculate sudden expansion pressure drop
 
-# In[18]:
+# In[87]:
 
 
 F = pd.read_csv("./SOURCE_DATA/FLUID_VALUES.csv")
@@ -199,38 +199,14 @@ F = F.rename({'fluidName':'fluid', 'K_SE':'k_se','latexName':'latexname'}, axis=
 F = F.drop(columns='fluidFlag')
 
 
-# In[19]:
+# In[88]:
 
 
 S = pd.read_csv("./SOURCE_DATA/SubjectReplicas_AirwayDimensions/SUBJECT_VALUES.csv")
 S = S.rename({'subNum':'subnum', 'areaAttach':'attacharea'}, axis='columns')
 
 
-# In[20]:
-
-
-# TODO: MOVE THESE FIRST TWO FUNCTIONS TO FLUIDS FILE
-
-def lpm_to_m3s(q_lpm):
-    '''converts flow rate from L/min to m3/s'''
-    q_m3s = q_lpm / 60 / 1000
-    return q_m3s
-
-def flow_to_vel(q_lpm, area_m2):
-    '''converts flow rate (m3/s) and area (m2) to velocity (m/s)'''
-    q_m3s = lpm_to_m3s(q_lpm)
-    vel_mps = q_m3s/area_m2
-    return vel_mps
-    
-def calc_pdrop_se(q_lpm, attacharea_m2, rho, k_se):
-    '''calculates sudden expansion into plenum 
-    at the attachment point of replica'''
-    velattach = flow_to_vel(q_lpm, attacharea_m2)
-    pdrop_se      = (1/2) * rho * k_se * (velattach**2)
-    return pdrop_se
-
-
-# In[21]:
+# In[89]:
 
 
 def map_df_small_to_big(df_big,df_small,indexname,propertyname,keepwhat='wholetable'):
@@ -247,17 +223,25 @@ def map_df_small_to_big(df_big,df_small,indexname,propertyname,keepwhat='wholeta
         return df_aug[propertyname]  # or keep only the new property values
 
 
-# In[22]:
+# In[90]:
 
 
 # add necessary values to table for vector calculation of p_se, then drop them after. 
 T = map_df_small_to_big(T,S,'subnum','attacharea')
 T = map_df_small_to_big(T,F,'fluid',['rho','mu','k_se'])
+
+def calc_pdrop_se(q_lpm, attacharea_m2, rho, k_se):
+    '''calculates sudden expansion into plenum 
+    at the attachment point of replica'''
+    velattach = fluids.flow_to_vel(q_lpm, attacharea_m2)
+    pdrop_se = (1/2) * rho * k_se * (velattach**2)
+    return pdrop_se
+
 T['pdrop_se'] = calc_pdrop_se(T['qstp'].values, T['attacharea'].values, T['rho'].values, T['k_se'].values)
 T = T.drop(['attacharea','rho','mu','k_se'], axis=1)
 
 
-# In[23]:
+# In[91]:
 
 
 T.head()
@@ -265,7 +249,7 @@ T.head()
 
 # ## Import empty pressure drop readings
 
-# In[24]:
+# In[92]:
 
 
 # Import data
@@ -296,7 +280,7 @@ E = pd.pivot_table(E, index=['fluid','qnom'], aggfunc=np.mean)  #aggregate and a
 E = E.reset_index()
 
 
-# In[25]:
+# In[93]:
 
 
 def powerfit(x,y):
@@ -326,7 +310,7 @@ def make_pdrop_empty_main_func(E):
 calc_pdrop_empty = make_pdrop_empty_main_func(E)
 
 
-# In[26]:
+# In[94]:
 
 
 # Calculate 'pdrop_empty' to account for the exit pipe dimensions
@@ -335,7 +319,7 @@ T['pdrop_empty'] = np.vectorize(calc_pdrop_empty)(T.qstp,T.fluid)
 
 # ## Calculate Branching and Nose-Throat pressure drop
 
-# In[27]:
+# In[95]:
 
 
 # Calculate pdrop_dist and pdrop_nt as a function of the other recorded pressure drop values
@@ -344,7 +328,7 @@ T['pdrop_nosethroat'] = T['pdrop_detach'] - T['pdrop_se'] - T['pdrop_empty']
 T = T.drop(['pdrop_attach','pdrop_detach','pdrop_se','pdrop_empty'], axis=1)
 
 
-# In[28]:
+# In[96]:
 
 
 T.head()
@@ -354,28 +338,7 @@ T.head()
 
 # Function definitions
 
-# In[39]:
-
-
-# TODO: MOVE THESE TO FLUIDS FILE
-def calc_area(diam_m):
-    area_m2 = np.pi * diam_m**2 / 4
-    return area_m2
-
-def calc_cf(pdrop, q_lpm, diam_m, rho):
-    area_m2 = calc_area(diam_m)
-    vel_mps = flow_to_vel(q_lpm, area_m2)
-    cf = pdrop / (0.5 * rho * vel_mps**2)
-    return cf
-
-def calc_reynoldsnum(q_lpm, diam_m, rho, mu):
-    area_m2 = calc_area(diam_m)
-    vel_mps = flow_to_vel(q_lpm, area_m2)
-    reynoldsnum = rho * vel_mps * diam_m / mu
-    return reynoldsnum
-
-
-# In[30]:
+# In[97]:
 
 
 # add necessary values to main table in preparation for calculations
@@ -383,9 +346,9 @@ T = map_df_small_to_big(T,S,'subnum','diam')
 T = map_df_small_to_big(T,F,'fluid',['rho','mu'])    
 
 # Calculate C_F and Re and add to main table
-T['cf_branching']  = calc_cf(T.pdrop_branching,  T.qstp, T.diam, T.rho)
-T['cf_nosethroat'] = calc_cf(T.pdrop_nosethroat, T.qstp, T.diam, T.rho)
-T['reynoldsnum']   = calc_reynoldsnum(T.qstp, T.diam, T.rho, T.mu)
+T['cf_branching']  = fluids.calc_cf(T.pdrop_branching,  T.qstp, T.diam, T.rho)
+T['cf_nosethroat'] = fluids.calc_cf(T.pdrop_nosethroat, T.qstp, T.diam, T.rho)
+T['reynoldsnum']   = fluids.calc_reynoldsnum(T.qstp, T.diam, T.rho, T.mu)
 
 # Remove temporary calculation values
 T = T.drop(['diam','rho','mu'], axis=1)
@@ -393,20 +356,20 @@ T = T.drop(['diam','rho','mu'], axis=1)
 
 # # ANALYTICAL CALCULATIONS
 
-# In[31]:
+# In[98]:
 
 
 x = T[(T.subnum==3) & (T.fluid=='heliox')]
 x.plot('reynoldsnum','cf_branching');
 
 
-# In[32]:
+# In[99]:
 
 
 T.head()
 
 
-# In[33]:
+# In[100]:
 
 
 #plt.rcParams['figure.figsize'] = [16,7]
@@ -422,7 +385,7 @@ T.head()
 #plt.show()
 
 
-# In[34]:
+# In[101]:
 
 
 #sns.set_style('white')
@@ -433,13 +396,13 @@ T.head()
 #x.plot()2
 
 
-# In[36]:
+# In[102]:
 
 
 help(sum)
 
 
-# In[ ]:
+# In[103]:
 
 
 def calcpdropblasius(Q_mcube=None, D_m=None, L_m=None, rho_kgm3=None, mu_Pas=None, blasiusC=None):
@@ -457,7 +420,6 @@ def calcpdropblasius(Q_mcube=None, D_m=None, L_m=None, rho_kgm3=None, mu_Pas=Non
 
 # # TO DO #
 # - Move base functions to their own module (fluids)
-# - Begin using version control by exporting the py file
 # - Set up gitignore to avoid ipnyb files
 # - Change file hierarchy in folders
 # - Combine base files with MATLAB so that both can work on the data at once.
